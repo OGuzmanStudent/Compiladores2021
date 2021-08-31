@@ -9,13 +9,14 @@ public:
     const char operator_open_parenthesis = '(';
     const char operator_close_parenthesis = ')';
     string regex;
-    ThompsonConstruction(string r):regex(s){};
-    void process():
-      
-};
+    ThompsonConstruction(string r):regex(r) {};
+//    void process;
+
+    };
 int main () {
-    
-    cin<<
-    ThompsonConstruction t;
-    cout<<t.alphabet;
+    string input;
+    cin>>input;
+    cout<<input;
+    ThompsonConstruction t(input);
+    cout<<t.alphabet[3];
 }
