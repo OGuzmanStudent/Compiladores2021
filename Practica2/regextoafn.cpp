@@ -12,11 +12,4 @@ public:
     ThompsonConstruction(string r):regex(r) {};
 //    void process;
 
-    };
-int main () {
-    string input;
-    cin>>input;
-    cout<<input;
-    ThompsonConstruction t(input);
-    cout<<t.alphabet[3];
-}
+};
