@@ -24,13 +24,37 @@ public:
     };
 };
 
-    ThompsonConstruction::ThompsonConstruction(string expression,string
-    alphabet):regex(expression), alphabet(alphabet){}
-    // alphabet = "abcdefghijklmnopqrstuvwxyz";
-    const char epsylon = 'E';
-    const char operator_kleene = '*';
-    const char operator_union = '|';
-    const char operator_open_parenthesis = '(';
-    const char operator_close_parenthesis = ')';
-//    void process;
-
+ThompsonConstruction::ThompsonConstruction(string expression,string
+        alphabet):regex(expression), alphabet(alphabet) {}
+// alphabet = "abcdefghijklmnopqrstuvwxyz";
+const char epsylon = 'E';
+const char operator_kleene = '*';
+const char operator_union = '|';
+const char operator_open_parenthesis = '(';
+const char operator_close_parenthesis = ')';
+bool ThompsonConstruction::preprocess() {
+    int matchParethesis = 0;
+    //< O P E R A T O R  ~ P R E C E D E N C E >
+    //->Grouping ()
+    //->Single-character-ERE duplication * + ? {m,n}
+    //->Concatenation
+    //->Alternation | n
+    for (char symbol : regex) {
+        switch(symbol) {
+        case '(':
+            matchParethesis++;
+            break;
+        case ')':
+            matchParethesis--;
+            break;
+        case '*':
+            break;
+        case '|':
+            break;
+        default:
+            break;
+        }
+    }
+    bool isValidExpression = matchParethesis == 0;
+    return isValidExpression;
+}

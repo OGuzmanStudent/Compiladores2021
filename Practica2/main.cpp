@@ -8,4 +8,5 @@ int main () {
     cout<<input;
     ThompsonConstruction t(input, alphabet);
     cout<<t.alphabet[3];
+    return EXIT_SUCCESS;
 }
