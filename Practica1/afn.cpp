@@ -1,58 +1,46 @@
 #include <iostream>
-#include <map>
+#include <vector>
 using namespace std;
 class TransitionPair {
 public:
-    char simbol;
-    int toState;
-
-    TransitionPair (char s, int ns) : simbol(s), toState(ns)
-    {
-    };
+  char simbol;
+  int toState;
+  int fromState;
+  TransitionPair(char s, int fromState, int toState)
+      : simbol(s), toState(toState), fromState(fromState){};
 };
-class Af {
+class AF {
 public:
-    int currentState;
-    bool end;
-    int tableSize;
-    TransitionPair* transitionsTable;
-    Af(int cs,bool e, int ts, TransitionPair* tt): currentState(cs),
-        transitionsTable(tt), end(e), tableSize(ts) {};
-    int getNextState(char c) {
-        for (int i=0; i<tableSize; i++) {
-            if(transitionsTable[i].simbol == c) return transitionsTable[i].toState;
-        }
-        return -1;
-    };
+  int statesCount;
+  vector<int> states;
+  vector<int> finalStates;
+  vector<TransitionPair> transitionsTable;
+  AF(){};
 };
-
-int main () {
-    TransitionPair r1[2]=
-    {
-        TransitionPair('a', 1),
-        TransitionPair('b', 0)
-    };
-    TransitionPair r2[2]=
-    {
-        TransitionPair('a', 0),
-        TransitionPair('b', 0)
-    };
-    Af afd[2] = {
-        Af(0, false, 2, r1),
-        Af(1, true, 2, r2),
-    };
-    string stringToEvaluate;
-    int index = 0;
-    cout << "Ingresa la cadena a evaular";
-    cin >> stringToEvaluate;
-    for (char c : stringToEvaluate) {
-        index = afd[index].getNextState(c);
-        if (index == -1)break;
+class NFA : public AF {
+public:
+  vector<int> getNextStates(int fromState, char c) {
+    vector<int> resultStates;
+    int tableSize = transitionsTable.size();
+    for (int i = 0; i < tableSize; i++) {
+      if (transitionsTable[i].fromState == fromState &&
+          transitionsTable[i].simbol == c)
+        resultStates.push_back(transitionsTable[i].toState);
     }
-    if (index == -1 || !afd[index].end) {
-        cout<<"Invalido";
-    } else {
-        cout<<"valido";
+    return resultStates;
+  };
+  NFA(){};
+};
+class DFA : public AF {
+public:
+  int getNextState(int fromState, char c) {
+    int tableSize = transitionsTable.size();
+    for (int i = 0; i < tableSize; i++) {
+      if (transitionsTable[i].fromState == fromState &&
+          transitionsTable[i].simbol == c)
+        return transitionsTable[i].toState;
     }
-    return 0;
-}
+    return -1;
+  };
+  DFA(){};
+};
