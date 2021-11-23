@@ -30,7 +30,7 @@ public:
   AF ConcatCase(AF a, AF b);
   AF KleeneClosureCase(AF a);
   AF GroupingCase(string expression);
-  void evaluate();
+  AF evaluate(string regularExpression);
   bool preprocess();
   void writeAutomaton();
 };

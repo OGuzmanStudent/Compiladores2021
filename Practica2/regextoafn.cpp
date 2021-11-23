@@ -1,14 +1,15 @@
 #include "regextoafn.h"
 #include <iostream>
 #include <list>
+#include <stack>
 using namespace std;
 TransitionPair::TransitionPair(char s, int fromState, int toState)
-    : symbol(s), toState(toState), fromState(fromState){};
-TransitionPair::TransitionPair(){};
+    : symbol(s), toState(toState), fromState(fromState){}
+TransitionPair::TransitionPair(){}
 AF::AF() {
   AF::statesCount = 0;
   AF::tableSize = 0;
-};
+}
 void AF::addStates(int statesNumber) {
   for (int stateCounter = 0; stateCounter < statesNumber; stateCounter++) {
     states.push_back(stateCounter);
@@ -22,14 +23,14 @@ int AF::getNextState(int fromState, char c) {
       return transitionsTable[i].toState;
   }
   return -1;
-};
+}
 void AF::addTransitionPair(char symbol, int fromState, int toState) {
   TransitionPair newTransitionPair(symbol, fromState, toState);
   transitionsTable.push_back(newTransitionPair);
   tableSize++;
 }
 ThompsonConstruction::ThompsonConstruction(string expression, string alphabet)
-    : regex(expression), alphabet(alphabet){};
+    : regex(expression), alphabet(alphabet){}
 // alphabet = "abcdefghijklmnopqrstuvwxyz";
 const char epsylon = 'E';
 const char operator_kleene = '*';
@@ -57,9 +58,9 @@ AF ThompsonConstruction::UnionCase(vector<AF> options, int optionsNumber) {
     result.addTransitionPair(operator_concat, 0, toState);
     helper = options.at(optionCounter);
     for (TransitionPair helperTransition : helper.transitionsTable) {
-      result.addTransitionPair(
-          helperTransition.symbol, helperTransition.fromState + toState,
-          helperTransition.toState + toState);
+      result.addTransitionPair(helperTransition.symbol,
+                               helperTransition.fromState + toState,
+                               helperTransition.toState + toState);
     }
     toState += helper.statesCount;
 
@@ -94,7 +95,7 @@ AF ThompsonConstruction::ConcatCase(AF a, AF b) {
   result.finalState = a.statesCount + b.statesCount - 1;
 
   return result;
-};
+}
 AF ThompsonConstruction::KleeneClosureCase(AF a) {
   AF result;
   TransitionPair newTransitionPair;
@@ -115,7 +116,78 @@ AF ThompsonConstruction::KleeneClosureCase(AF a) {
   result.finalState = a.statesCount + 1;
 
   return result;
-};
+}
+AF ThompsonConstruction::evaluate(string regularExpression) {
+  stack<char> operators;
+  stack<AF> operands;
+  char operatorSymbol;
+  int operatorsCount;
+  AF *newSymbol;
+
+  for (char currentSymbol : regularExpression) {
+    if ( //si no es un operador, caso simbolo
+      currentSymbol != operator_open_parenthesis
+      && currentSymbol != operator_close_parenthesis
+      && currentSymbol != operator_kleene 
+      && currentSymbol != operator_union 
+      && currentSymbol != operator_concat
+      ) {
+      newSymbol = new AF();
+      newSymbol->addStates(2);
+      newSymbol->addTransitionPair(currentSymbol,0, 1);
+      newSymbol->finalState=1;
+      operands.push(*newSymbol);
+      delete newSymbol;
+    } else {
+      if (currentSymbol == operator_kleene) {
+        AF starOperator = operands.top();
+        operands.pop();
+        operands.push(KleeneClosureCase(starOperator));
+      } else if (currentSymbol == operator_concat) {
+        operators.push(currentSymbol);
+      } else if (currentSymbol == operator_union) {
+        operators.push(currentSymbol);
+      } else if (currentSymbol == operator_open_parenthesis) {
+        operators.push(currentSymbol);
+      } else {
+        operatorsCount = 0;
+        char c;
+        operatorSymbol = operators.top();
+        if (operatorSymbol == operator_open_parenthesis)
+          continue;
+        do {
+          operators.pop();
+          operatorsCount++;
+        } while (operators.top() != '(');
+        operators.pop();
+        AF op1;
+        AF op2;
+        vector<AF> selections;
+        if (operatorSymbol == '.') {
+          for (int i = 0; i < operatorsCount; i++) {
+            op2 = operands.top();
+            operands.pop();
+            op1 = operands.top();
+            operands.pop();
+            operands.push(ConcatCase(op1, op2));
+          }
+        } else if (operatorSymbol == '|') {
+          selections.assign(operatorsCount + 1, AF());
+          int tracker = operatorsCount;
+          for (int i = 0; i < operatorsCount + 1; i++) {
+            selections.at(tracker) = operands.top();
+            tracker--;
+            operands.pop();
+          }
+          operands.push(UnionCase(selections, operatorsCount + 1));
+        } else {
+        }
+      }
+    }
+  }
+
+  return operands.top();
+}
 // AutomatonGroup::
 // bool ThompsonConstruction::preprocess() {
 //  int matchParethesis = 0;
