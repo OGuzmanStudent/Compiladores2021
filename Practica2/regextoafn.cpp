@@ -4,8 +4,8 @@
 #include <stack>
 using namespace std;
 TransitionPair::TransitionPair(char s, int fromState, int toState)
-    : symbol(s), toState(toState), fromState(fromState){}
-TransitionPair::TransitionPair(){}
+    : symbol(s), toState(toState), fromState(fromState) {}
+TransitionPair::TransitionPair() {}
 AF::AF() {
   AF::statesCount = 0;
   AF::tableSize = 0;
@@ -30,7 +30,7 @@ void AF::addTransitionPair(char symbol, int fromState, int toState) {
   tableSize++;
 }
 ThompsonConstruction::ThompsonConstruction(string expression, string alphabet)
-    : regex(expression), alphabet(alphabet){}
+    : regex(expression), alphabet(alphabet) {}
 // alphabet = "abcdefghijklmnopqrstuvwxyz";
 const char epsylon = 'E';
 const char operator_kleene = '*';
@@ -117,6 +117,43 @@ AF ThompsonConstruction::KleeneClosureCase(AF a) {
 
   return result;
 }
+bool neededToAppend(char symbol) {
+  return symbol != operator_close_parenthesis && symbol != operator_union &&
+         symbol != operator_kleene;
+}
+bool isNotOperator(char symbol) {
+  return symbol != operator_open_parenthesis &&
+         symbol != operator_close_parenthesis && symbol != operator_union &&
+         symbol != operator_kleene;
+}
+string ThompsonConstruction::preprocess(string regularExpression) {
+  string processedRegularExpression = "";
+  int sizeOfRegex = regularExpression.length();
+  int lastSymbolIndex = sizeOfRegex - 1;
+  for (int regexIterator = 0; regexIterator < sizeOfRegex; regexIterator++) {
+    char symbol = regularExpression[regexIterator];
+    bool notFinalSymbol = regexIterator < lastSymbolIndex;
+    if (notFinalSymbol) {
+      char nextSymbol = regularExpression[regexIterator + 1];
+      if (
+        (
+          isNotOperator(symbol) && 
+          neededToAppend(nextSymbol)
+        ) 
+        ||
+        (
+          symbol == operator_close_parenthesis &&
+          neededToAppend(nextSymbol)
+        )
+      ) {
+        processedRegularExpression += symbol;
+        processedRegularExpression += operator_concat;
+      } else
+        processedRegularExpression += symbol;
+    } else
+      processedRegularExpression += symbol;
+  }
+}
 AF ThompsonConstruction::evaluate(string regularExpression) {
   stack<char> operators;
   stack<AF> operands;
@@ -125,17 +162,15 @@ AF ThompsonConstruction::evaluate(string regularExpression) {
   AF *newSymbol;
 
   for (char currentSymbol : regularExpression) {
-    if ( //si no es un operador, caso simbolo
-      currentSymbol != operator_open_parenthesis
-      && currentSymbol != operator_close_parenthesis
-      && currentSymbol != operator_kleene 
-      && currentSymbol != operator_union 
-      && currentSymbol != operator_concat
-      ) {
+    if ( // si no es un operador, caso simbolo
+        currentSymbol != operator_open_parenthesis &&
+        currentSymbol != operator_close_parenthesis &&
+        currentSymbol != operator_kleene && currentSymbol != operator_union &&
+        currentSymbol != operator_concat) {
       newSymbol = new AF();
       newSymbol->addStates(2);
-      newSymbol->addTransitionPair(currentSymbol,0, 1);
-      newSymbol->finalState=1;
+      newSymbol->addTransitionPair(currentSymbol, 0, 1);
+      newSymbol->finalState = 1;
       operands.push(*newSymbol);
       delete newSymbol;
     } else {

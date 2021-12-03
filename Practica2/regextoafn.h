@@ -31,6 +31,6 @@ public:
   AF KleeneClosureCase(AF a);
   AF GroupingCase(string expression);
   AF evaluate(string regularExpression);
-  bool preprocess();
+  string preprocess(string regularExpression);
   void writeAutomaton();
 };
