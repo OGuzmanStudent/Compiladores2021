@@ -1,4 +1,5 @@
 #include "regextoafn.h"
+#include <fstream>
 #include <iostream>
 #include <list>
 #include <stack>
@@ -38,6 +39,15 @@ const char operator_union = '|';
 const char operator_concat = '^';
 const char operator_open_parenthesis = '(';
 const char operator_close_parenthesis = ')';
+void AF::writeToDot() {
+  ofstream myfile;
+  myfile.open("dot.txt");
+  for (TransitionPair transition : transitionsTable) {
+    myfile << "q" << transition.fromState << " --> " << transition.toState
+           << " : Symbol - " << transition.symbol << endl;
+  }
+  myfile.close();
+}
 AF ThompsonConstruction::UnionCase(vector<AF> options, int optionsNumber) {
   AF result;
   int statesCount = 2;
@@ -135,17 +145,9 @@ string ThompsonConstruction::preprocess(string regularExpression) {
     bool notFinalSymbol = regexIterator < lastSymbolIndex;
     if (notFinalSymbol) {
       char nextSymbol = regularExpression[regexIterator + 1];
-      if (
-        (
-          isNotOperator(symbol) && 
-          neededToAppend(nextSymbol)
-        ) 
-        ||
-        (
-          symbol == operator_close_parenthesis &&
-          neededToAppend(nextSymbol)
-        )
-      ) {
+      if ((isNotOperator(symbol) && neededToAppend(nextSymbol)) ||
+          (symbol == operator_close_parenthesis &&
+           neededToAppend(nextSymbol))) {
         processedRegularExpression += symbol;
         processedRegularExpression += operator_concat;
       } else
@@ -160,8 +162,9 @@ AF ThompsonConstruction::evaluate(string regularExpression) {
   char operatorSymbol;
   int operatorsCount;
   AF *newSymbol;
+  string processedRegularExpression = preprocess(regularExpression);
 
-  for (char currentSymbol : regularExpression) {
+  for (char currentSymbol : processedRegularExpression) {
     if ( // si no es un operador, caso simbolo
         currentSymbol != operator_open_parenthesis &&
         currentSymbol != operator_close_parenthesis &&
@@ -186,7 +189,6 @@ AF ThompsonConstruction::evaluate(string regularExpression) {
         operators.push(currentSymbol);
       } else {
         operatorsCount = 0;
-        char c;
         operatorSymbol = operators.top();
         if (operatorSymbol == operator_open_parenthesis)
           continue;

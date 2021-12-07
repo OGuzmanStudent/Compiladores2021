@@ -2,11 +2,14 @@
 #include "regextoafn.h"
 using namespace std;
 const string alphabet = "abcdefghijklmno    pqrstuvwxyz";
-int main () {
-    string input;
-    cin>>input;
-    cout<<input;
-    ThompsonConstruction t(input, alphabet);
-    cout<<t.alphabet[3];
-    return EXIT_SUCCESS;
+int main() {
+  string re;
+	cin>>re;
+
+
+	AF automaton;
+	automaton = ThompsonConstruction(re,alphabet).evaluate(re);
+	automaton.writeToDot();
+
+	return 0;
 }

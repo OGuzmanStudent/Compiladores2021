@@ -20,6 +20,7 @@ public:
   void addStates(int statesNumber);
   int getNextState(int fromState, char c);
   void addTransitionPair(char symbol, int fromState, int toState);
+  void writeToDot();
 };
 class ThompsonConstruction {
 public:
