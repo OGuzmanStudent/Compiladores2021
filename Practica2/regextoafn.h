@@ -33,5 +33,4 @@ public:
   AF GroupingCase(string expression);
   AF evaluate(string regularExpression);
   string preprocess(string regularExpression);
-  void writeAutomaton();
 };
